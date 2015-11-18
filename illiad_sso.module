@@ -1,0 +1,408 @@
+<?php
+
+// contents
+//  contents
+//  custom_mvc
+//  menu
+//  permission
+//  custom_page_login
+//  custom_form
+//  custom_form_settings
+//  _get_settings_variable
+//  _login_action
+
+
+// data-oriented approach to mvc (not really mvc per se)
+function illiad_sso_custom_mvc($key){
+ if("keys" == $key)
+  return array(
+   "keys",
+   "login",
+   "config",
+   "settings"
+  );
+ $t = get_t();
+ $module_name = "illiad_sso";
+ $product_name = "ILLiad";
+ $module_title = $product_name . " SSO";
+ $admin_path = "admin/config";
+ $config_path = $admin_path . "/" . "illiad";
+ $administer_permission_name = "administer " . $module_name;
+ $access_permission_name = "access " . $product_name;
+ if("login" == $key){
+  $path = "illiad_login";
+  $title = $product_name . " login";
+  $description = "log in to " . $product_name;
+  $page_callback = $module_name . "_custom_page_login";
+  $access_arguments = array("access content");
+  $type = MENU_CALLBACK;
+  $menu_item = array(
+   "title" => $title,
+   "description" => $description,
+   "page callback" => $page_callback,
+   "access arguments" => $access_arguments,
+   "type" => $type
+  );
+  $menu_data = array(
+   "path" => $path,
+   "menu" => $menu_item
+  );
+
+  $access_permission = array(
+   "name" => $access_permission_name,
+   "item" => array(
+    "title" => $t("Access " . $product_name),
+    "description" => $t("Log in to " . $product_name)
+   )
+  );
+  $impersonate_permission = array(
+   "name" => "impersonate " . $product_name . " user",
+   "item" => array(
+    "title" => $t("Masquerade as an ILLiad user"),
+    "description" => $t("Spoof the OUNetID of a user, to log in as them, for diagnostic purposes")
+   )
+  );
+  $permissions = array(
+   $access_permission,
+   $impersonate_permission
+  );
+  $result = array(
+   "menu" => $menu_data,
+   "permissions" => $permissions
+  );
+  return $result;
+ }
+ if("config" == $key){
+  $path = $config_path;
+  $title = $module_title;
+  $description = "Configure " . $product_name . " integration.";
+  $page_callback = "system_admin_menu_block_page";
+  $file = "system.admin.inc";
+  $file_path = drupal_get_path("module", "system");
+  $permission_name = $administer_permission_name;
+  $menu_item = array(
+   "title" => $title,
+   "description" => $description,
+   "page callback" => $page_callback,
+   "access arguments" => array($permission_name),
+   "file" => $file,
+   "file path" => $file_path
+  );
+  $menu_data = array(
+   "path" => $path,
+   "menu" => $menu_item
+  );
+
+  $permission_description = $t("Configure the " . $title . " module");
+  $permission = array(
+   "title" => $t("Administer " . $title),
+   "description" => $permission_description
+  );
+  $permission_data = array(
+   "name" => $permission_name,
+   "item" => $permission
+  );
+  $result = array(
+   "menu" => $menu_data,
+   "permissions" => array($permission_data)
+  );
+  return $result;
+ }
+ if("settings" == $key){
+  $path = $config_path . "/settings";
+  $title = $module_title . " Settings";
+  $description = "Settings for ILLiad";
+  $page_callback = "drupal_get_form";
+  $form_name = $module_name . "_custom_form_" . $key;
+  $permission_name = $administer_permission_name;
+  $menu_item = array(
+   "title" => $title,
+   "description" => $description,
+   "page callback" => $page_callback,
+   "page arguments" => array($form_name),
+   "access arguments" => array($permission_name)
+  );
+  $menu_data = array(
+   "path" => $path,
+   "menu" => $menu_item
+  );
+
+  $soonerid_profilefield_name_field = array(
+   "field_name" => "soonerid_profilefield_name",
+   "default" => "field_soonerid",
+   "field" => array(
+    "#type" => "textfield", # TODO: can we make this an options field?
+    "#title" => $t("Sooner ID profile field name"),
+    "#description" => $t("the name of the profile field that represents the Sooner ID")
+   )
+  );
+  $permission_field = array(
+   "field_name" => "illiad_sso_access_permission",
+   "default" => $access_permission_name,
+   "field" => array(
+    "#type" => "textfield", # TODO: make this an options field
+    "#title" => $t("ILLiad access permission name"),
+    "#description" => $t("the user_access() parameter to check before redirecting to ILLiad")
+   )
+  );
+  $url_field = array(
+   "field_name" => "illiad_url",
+   "default" => "https://ill.libraries.ou.edu/illiad.dll",
+   "field" => array(
+    "#type" => "textfield", # TODO: is there a URL field?
+    "#title" => $t("ILLiad sign-on URL"),
+    "#description" => $t("the form processing agent for ILLiad's API")
+   )
+  );
+  $secret_field = array(
+   "field_name" => "illiad_shared_secret",
+   "default" => "0",
+   "field" => array(
+    "#type" => "textfield", # TODO: make this a numeric field
+    "#title" => $t("ILLiad shared secret"),
+    "#description" => $t("the number to blend with the password")
+   )
+  );
+  $fields = array(
+   $soonerid_profilefield_name_field, # unfortunately, order matters
+   $permission_field,
+   $url_field,
+   $secret_field
+  );
+  $form_data = array(
+   "fields" => $fields
+  );
+  $result = array(
+   "menu" => $menu_data,
+   "form" => $form_data,
+   "permissions" => array()
+  );
+  return $result;
+ }
+}
+
+
+// implements hook_menu
+function illiad_sso_menu(){
+ $menu_items = array();
+ $keys = illiad_sso_custom_mvc("keys");
+ foreach($keys as $key){
+  $mvc = illiad_sso_custom_mvc($key);
+  if(array_key_exists("menu", $mvc)){
+   $menu = $mvc["menu"];
+   $menu_items[$menu["path"]] = $menu["menu"];
+  }
+ }
+ return $menu_items;
+}
+
+// implements hook_permission
+function illiad_sso_permission(){
+ $permissions = array();
+ $keys = illiad_sso_custom_mvc("keys");
+ foreach($keys as $key){
+  $mvc = illiad_sso_custom_mvc($key);
+  if(array_key_exists("permissions", $mvc)){
+   foreach($mvc["permissions"] as $permission)
+    $permissions[$permission["name"]] = $permission["item"];
+  }
+ }
+ return $permissions;
+}
+
+
+// callback for the login page
+function illiad_sso_custom_page_login(){
+ global $user;
+ $module_name = "illiad_sso";
+ $product_name = "ILLiad";
+
+ if(!$user->uid)
+  // TODO: consider redirecting back here after login
+  return drupal_get_form("user_login");
+
+ $ounetid = $user->name;
+ if(array_key_exists("checkStatus", $_GET) && "true" == $_GET["checkStatus"]){
+  $impersonate_permission_name = "impersonate " . $product_name . " user";
+  if(user_access($impersonate_permission_name)){
+   if(array_key_exists("uid", $_GET) && $_GET["uid"])
+    $ounetid = $_GET["uid"];
+  }
+ }
+ if(!$ounetid){
+  // TODO: make a more meaningful error page here
+  $error = t("I wasn't able to find that user");
+  drupal_set_massage($error, "error");
+  return "";
+ }
+
+ $uid = db_query("SELECT uid FROM {users} WHERE name = :name AND status = 1", array(":name" => $ounetid))->fetchObject()->uid;
+ $account = user_load($uid);
+ if(!$account){
+  // TODO: make a more meaningful error page here
+  $error = t("No user by that name exists here.");
+  drupal_set_massage($error, "error");
+  return "";
+ }
+
+ $access_check = _illiad_sso_get_settings_variable("illiad_access permission");
+ if(!user_access($access_check, $account)){
+  $error = t("You do not have permission to access " . $product_name);
+  drupal_set_message($error, "error");
+  return "";
+ }
+
+ $soonerid_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
+ $soonerid_field = field_get_items("user", $account, $soonerid_field_name);
+ $soonerid = "";
+ if(array_key_exists(0, $soonerid_field))
+  if(array_key_exists("value", $soonerid_field[0]))
+   $soonerid = $soonerid_field[0]["value"];
+ if(!$soonerid){
+  $error = t("Your Sooner ID does not appear to be set.");
+  drupal_set_message($error, "error");
+  return ""; // TODO: redirect to the page where they can set their Sooner ID
+ }
+
+ $secret = _illiad_sso_get_settings_variable("sso secret");
+ $password = $soonerid * 4 + $secret; # wow
+
+ $login_form_action = _illiad_sso_login_action();
+
+ $form_name = "frmLogon";
+ $submit_button_name = "SubmitButton";
+ $form_attributes = array(
+  "name" => $form_name,
+  "method" => "POST",
+  "action" => $login_form_action
+ );
+
+ $form_open_tag = array(array("#markup" => "<form"));
+ foreach($form_attributes as $k => $v){
+  $markup = " " . $k . "=\"" . htmlspecialchars($v) . "\"";
+  $form_open_tag[] = array("#markup" => $markup);
+ }
+ $form_open_tag[] = array("#markup" => ">\n");
+
+ $fields = array(
+  "ILLiadForm" => array("hidden", "Logon"),
+  "Username" => array("hidden", $ounetid),
+  "Password" => array("hidden", $password),
+  $submit_button_name => array("submit", "Logon to " . $product_name)
+ );
+ $form = array(); // TODO: build a form instead
+ $form[] = $form_open_tag;
+ foreach($fields as $name => $field){
+  $type = $field[0];
+  $value = $field[1];
+  $markup = "<input type=\"" . $type . "\" name=\"" . $name . "\" value=\"" . htmlspecialchars($value) . "\">";
+  $form[] = array("#markup" => " " . $markup . "\n");
+ }
+ $form[] = array("#markup" => "</form>\n");
+ $script = "document." . $form_name . "." . $submit_button_name . ".click();";
+ $script_tag = array(
+  array("#markup"=>"<script>\n"),
+  array("#markup"=>" " . $script . "\n"),
+  array("#markup"=>"</script>\n")
+ );
+ return array(
+  $form,
+  $script_tag
+ );
+}
+
+// a helper for forms nestled in the above custom false-"mvc" format
+function illiad_sso_custom_form($name, $values=NULL, $omit_prefix=FALSE){
+ $module_name = "illiad_sso";
+ $form_data = illiad_sso_custom_mvc($name)["form"];
+ $form = array();
+ foreach($form_data["fields"] as $field_data){
+  $prefix = $omit_prefix ? "" : $module_name . "_";
+  $field_name = $prefix . $field_data["field_name"];
+  $field = $field_data["field"];
+  if(isset($values) && isset($values[$field_data["field_name"]]))
+   $field["value"] = $values[$field_data["field_name"]];
+  else{
+   $fallback_value = $field_data["default"];
+   $default_variable = $field_name;
+   $default_value = variable_get($default_variable, $fallback_value);
+   $field["#default_value"] = $default_value;
+  }
+  $form[$field_name] = $field;
+ }
+ return $form;
+}
+
+// form builder for settings page
+function illiad_sso_custom_form_settings(){
+ return system_settings_form(illiad_sso_custom_form("settings"));
+}
+
+// a helper for using the variables stored by the settings form
+function _illiad_sso_get_settings_variable($varname){
+ $module_name = "illiad_sso";
+ $form = illiad_sso_custom_mvc("settings")["form"];
+ $index = array_flip(
+  array(
+   "sooner_id profile_field name",
+   "illiad_access permission",
+   "illiad url",
+   "sso secret"
+  )
+ )[$varname];
+ $field_data = $form["fields"][$index];
+ $variable = $module_name . "_" . $field_data["field_name"];
+ $fallback = $field_data["default"];
+ return variable_get($variable, $fallback);
+}
+
+// a helper for determining the "action" URL of the ILLiad login form
+function _illiad_sso_login_action(){
+ $querystring = $_SERVER["QUERY_STRING"];
+ $url = _illiad_sso_get_settings_variable("illiad url");
+ if(!$querystring) return $url;
+ $task = "";
+ if(isset($_GET["task"])) $task = $_GET["task"];
+
+ if("tulsapass" == $task) return $url;
+
+ $replacements = array();
+ foreach(array("title", "jtitle", "stitle", "au") as $k)
+  $replacements["&rft." . $k . "=&"] = "&";
+
+ $value = "GenericRequestSoonerLoan";
+
+ $loan = "sxloan";
+ if($loan == $task)
+  $replacements["genre=book"] = "genre=" . $loan;
+ else{
+  if("sxcopy" == $task){
+   if("book" == $_GET["rft.genre"]){
+    $replacements["genre=book"] = "genre=" . $loan;
+   }
+   else{
+    foreach(array("article", "journal", "bookitem") as $genre)
+     $replacements["genre=" . $genre] = "genre=sxarticle";
+    $value = "GenericRequestSoonerArticle";
+   }
+  }
+  else{
+   foreach(array("isbn", "issn") as $k)
+    $replacements["&" . $k . "=&"] = "&";
+   $atitle = "";
+   if(isset($_GET["rft.atitle"])) $atitle = $_GET["rft.atitle"];
+   if(!$atitle)
+    foreach(array("unknown", "issue") as $genre)
+     $replacements["&rft.genre=" . $genre] = "&rft.genre=article";
+   foreach(array(":", "%3A") as $colon)
+    $replacements["prime.exlibrisgroup.com" . $colon] = "";
+   $value = "";
+  }
+ }
+
+ foreach($replacements as $k => $v)
+  $querystring = str_replace($k, $v, $querystring);
+
+ $value_param = $value ? "&Value=" . $value : "";
+ return $url . "?Action=10&Form=30" . $value_param . "&" . $querystring;
+}

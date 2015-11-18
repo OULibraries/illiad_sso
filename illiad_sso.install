@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Install Illiad SSO module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function illiad_sso_install(){
+ $t = get_t();
+ $message = "ILLiad SSO installed.";
+ $message = $t($message);
+ drupal_set_message($message);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function illiad_sso_uninstall(){
+ $t = get_t();
+
+ // Delete our variables and clear variables cache.
+ $module_name = "illiad_sso";
+ $module_key = ":" . $module_name;
+ $params = array();
+ $params[$module_key] = $module_name;
+ $query = "DELETE" .
+  " FROM {variable}" .
+  " WHERE name LIKE" .
+  " " . $module_key . "%";
+ db_query($query, $params);
+ cache_clear_all("variables", "cache");
+
+ $message = "ILLiad SSO module uninstalled.";
+ $message = $t($message);
+ drupal_set_message($message);
+}
