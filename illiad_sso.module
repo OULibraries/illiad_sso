@@ -320,7 +320,7 @@ function illiad_sso_custom_form($name, $values=NULL, $omit_prefix=FALSE){
   $prefix = $omit_prefix ? "" : $module_name . "_";
   $field_name = $prefix . $field_data["field_name"];
   $field = $field_data["field"];
-  if(isset($values) && isset($values[$field_data["field_name"]]))
+  if(isset($values) && array_key_exists($field_data["field_name"], $values))
    $field["value"] = $values[$field_data["field_name"]];
   else{
    $fallback_value = $field_data["default"];
@@ -362,7 +362,8 @@ function _illiad_sso_login_action(){
  $url = _illiad_sso_get_settings_variable("illiad url");
  if(!$querystring) return $url;
  $task = "";
- if(isset($_GET["task"])) $task = $_GET["task"];
+ if(array_key_exists("task", $_GET))
+  $task = $_GET["task"];
 
  if("tulsapass" == $task) return $url;
 
@@ -377,7 +378,7 @@ function _illiad_sso_login_action(){
   $replacements["genre=book"] = "genre=" . $loan;
  else{
   if("sxcopy" == $task){
-   if("book" == $_GET["rft.genre"]){
+   if(array_key_exists("rft.genre", $_GET) && "book" == $_GET["rft.genre"]){
     $replacements["genre=book"] = "genre=" . $loan;
    }
    else{
@@ -390,7 +391,8 @@ function _illiad_sso_login_action(){
    foreach(array("isbn", "issn") as $k)
     $replacements["&" . $k . "=&"] = "&";
    $atitle = "";
-   if(isset($_GET["rft.atitle"])) $atitle = $_GET["rft.atitle"];
+   if(array_key_exists("rft.atitle", $_GET))
+    $atitle = $_GET["rft.atitle"];
    if(!$atitle)
     foreach(array("unknown", "issue") as $genre)
      $replacements["&rft.genre=" . $genre] = "&rft.genre=article";
