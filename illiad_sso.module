@@ -214,12 +214,18 @@ function illiad_sso_permission(){
 // callback for the login page
 function illiad_sso_custom_page_login(){
  global $user;
+ global $illiad_sso_volatile_url;
  $module_name = "illiad_sso";
  $product_name = "ILLiad";
 
- if(!$user->uid)
-  // TODO: consider redirecting back here after login
-  return drupal_get_form("user_login");
+ if(!$user->uid){
+  $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
+  drupal_set_message("before form");
+  $form = drupal_get_form("user_login");
+  drupal_set_message("after form");
+  $illiad_sso_volatile_url = "";
+  return $form;
+ }
 
  $ounetid = $user->name;
  if(array_key_exists("checkStatus", $_GET) && "true" == $_GET["checkStatus"]){
@@ -309,6 +315,16 @@ function illiad_sso_custom_page_login(){
   $form,
   $script_tag
  );
+}
+
+function illiad_sso_form_alter(&$form, &$form_state, $form_id){
+ global $illiad_sso_volatile_url;
+ drupal_set_message("url: (" . $illiad_sso_volatile_url . ")\ncurrent path (" . current_path() . ")");
+ if(!$illiad_sso_volatile_url) return;
+ if(!"illiad_login" == current_path())
+ return;
+ if($form_id != "user_login") return;
+ $form_state["redirect"] = $volatile_url;
 }
 
 // a helper for forms nestled in the above custom false-"mvc" format
