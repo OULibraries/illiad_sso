@@ -220,9 +220,7 @@ function illiad_sso_custom_page_login(){
 
  if(!$user->uid){
   $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
-  drupal_set_message("before form");
   $form = drupal_get_form("user_login");
-  drupal_set_message("after form");
   $illiad_sso_volatile_url = "";
   return $form;
  }
@@ -261,9 +259,10 @@ function illiad_sso_custom_page_login(){
  $soonerid_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
  $soonerid_field = field_get_items("user", $account, $soonerid_field_name);
  $soonerid = "";
- if(array_key_exists(0, $soonerid_field))
-  if(array_key_exists("value", $soonerid_field[0]))
-   $soonerid = $soonerid_field[0]["value"];
+ if($soonerid_field)
+  if(array_key_exists(0, $soonerid_field))
+   if(array_key_exists("value", $soonerid_field[0]))
+    $soonerid = $soonerid_field[0]["value"];
  if(!$soonerid){
   $error = t("Your Sooner ID does not appear to be set.");
   drupal_set_message($error, "error");
@@ -319,12 +318,23 @@ function illiad_sso_custom_page_login(){
 
 function illiad_sso_form_alter(&$form, &$form_state, $form_id){
  global $illiad_sso_volatile_url;
- drupal_set_message("url: (" . $illiad_sso_volatile_url . ")\ncurrent path (" . current_path() . ")");
  if(!$illiad_sso_volatile_url) return;
- if(!"illiad_login" == current_path())
- return;
+ if("illiad_login" != current_path())
+  return;
  if($form_id != "user_login") return;
- $form_state["redirect"] = $volatile_url;
+ $form["illiad_sso_redirect_url"] = array(
+  "#type" => "hidden",
+  "#value" => $illiad_sso_volatile_url
+ );
+}
+
+function illiad_sso_user_login(&$edit, $account){
+ $values = $edit["values"];
+ if(empty($values["illiad_sso_redirect_url"])) return;
+ if(!$account->uid) return; // how does this state happen?
+ $url = $values["illiad_sso_redirect_url"];
+ header("Location: " . $url);
+ exit();
 }
 
 // a helper for forms nestled in the above custom false-"mvc" format
