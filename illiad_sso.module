@@ -340,7 +340,8 @@ function illiad_sso_user_login(&$edit, $account){
 // a helper for forms nestled in the above custom false-"mvc" format
 function illiad_sso_custom_form($name, $values=NULL, $omit_prefix=FALSE){
  $module_name = "illiad_sso";
- $form_data = illiad_sso_custom_mvc($name)["form"];
+ $mvc = illiad_sso_custom_mvc($name);
+ $form_data = $mvc["form"];
  $form = array();
  foreach($form_data["fields"] as $field_data){
   $prefix = $omit_prefix ? "" : $module_name . "_";
@@ -367,15 +368,17 @@ function illiad_sso_custom_form_settings(){
 // a helper for using the variables stored by the settings form
 function _illiad_sso_get_settings_variable($varname){
  $module_name = "illiad_sso";
- $form = illiad_sso_custom_mvc("settings")["form"];
- $index = array_flip(
+ $settings = illiad_sso_custom_mvc("settings");
+ $form = $settings["form"];
+ $names_to_index = array_flip(
   array(
    "sooner_id profile_field name",
    "illiad_access permission",
    "illiad url",
    "sso secret"
   )
- )[$varname];
+ );
+ $index = $names_to_index[$varname];
  $field_data = $form["fields"][$index];
  $variable = $module_name . "_" . $field_data["field_name"];
  $fallback = $field_data["default"];
