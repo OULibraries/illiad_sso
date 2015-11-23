@@ -2,9 +2,10 @@
 
 // contents
 //  contents
-//  custom_mvc
-//  menu
-//  permission
+//  includes
+//  hooks
+//   menu
+//   permission
 //  custom_page_login
 //  custom_form
 //  custom_form_settings
@@ -12,175 +13,7 @@
 //  _login_action
 
 
-// data-oriented approach to mvc (not really mvc per se)
-function illiad_sso_custom_mvc($key){
- if("keys" == $key)
-  return array(
-   "keys",
-   "login",
-   "config",
-   "settings"
-  );
- $t = get_t();
- $module_name = "illiad_sso";
- $product_name = "ILLiad";
- $module_title = $product_name . " SSO";
- $admin_path = "admin/config";
- $config_path = $admin_path . "/" . "illiad";
- $administer_permission_name = "administer " . $module_name;
- $access_permission_name = "access " . $product_name;
- if("login" == $key){
-  $path = "illiad_login";
-  $title = $product_name . " login";
-  $description = "log in to " . $product_name;
-  $page_callback = $module_name . "_custom_page_login";
-  $access_arguments = array("access content");
-  $type = MENU_CALLBACK;
-  $menu_item = array(
-   "title" => $title,
-   "description" => $description,
-   "page callback" => $page_callback,
-   "access arguments" => $access_arguments,
-   "type" => $type
-  );
-  $menu_data = array(
-   "path" => $path,
-   "menu" => $menu_item
-  );
-
-  $access_permission = array(
-   "name" => $access_permission_name,
-   "item" => array(
-    "title" => $t("Access " . $product_name),
-    "description" => $t("Log in to " . $product_name)
-   )
-  );
-  $impersonate_permission = array(
-   "name" => "impersonate " . $product_name . " user",
-   "item" => array(
-    "title" => $t("Masquerade as an ILLiad user"),
-    "description" => $t("Spoof the OUNetID of a user, to log in as them, for diagnostic purposes")
-   )
-  );
-  $permissions = array(
-   $access_permission,
-   $impersonate_permission
-  );
-  $result = array(
-   "menu" => $menu_data,
-   "permissions" => $permissions
-  );
-  return $result;
- }
- if("config" == $key){
-  $path = $config_path;
-  $title = $module_title;
-  $description = "Configure " . $product_name . " integration.";
-  $page_callback = "system_admin_menu_block_page";
-  $file = "system.admin.inc";
-  $file_path = drupal_get_path("module", "system");
-  $permission_name = $administer_permission_name;
-  $menu_item = array(
-   "title" => $title,
-   "description" => $description,
-   "page callback" => $page_callback,
-   "access arguments" => array($permission_name),
-   "file" => $file,
-   "file path" => $file_path
-  );
-  $menu_data = array(
-   "path" => $path,
-   "menu" => $menu_item
-  );
-
-  $permission_description = $t("Configure the " . $title . " module");
-  $permission = array(
-   "title" => $t("Administer " . $title),
-   "description" => $permission_description
-  );
-  $permission_data = array(
-   "name" => $permission_name,
-   "item" => $permission
-  );
-  $result = array(
-   "menu" => $menu_data,
-   "permissions" => array($permission_data)
-  );
-  return $result;
- }
- if("settings" == $key){
-  $path = $config_path . "/settings";
-  $title = $module_title . " Settings";
-  $description = "Settings for ILLiad";
-  $page_callback = "drupal_get_form";
-  $form_name = $module_name . "_custom_form_" . $key;
-  $permission_name = $administer_permission_name;
-  $menu_item = array(
-   "title" => $title,
-   "description" => $description,
-   "page callback" => $page_callback,
-   "page arguments" => array($form_name),
-   "access arguments" => array($permission_name)
-  );
-  $menu_data = array(
-   "path" => $path,
-   "menu" => $menu_item
-  );
-
-  $sooner_id_profilefield_name_field = array(
-   "field_name" => "sooner_id_profilefield_name",
-   "default" => "field_sooner_id",
-   "field" => array(
-    "#type" => "textfield", # TODO: can we make this an options field?
-    "#title" => $t("Sooner ID profile field name"),
-    "#description" => $t("the name of the profile field that represents the Sooner ID")
-   )
-  );
-  $permission_field = array(
-   "field_name" => "illiad_sso_access_permission",
-   "default" => $access_permission_name,
-   "field" => array(
-    "#type" => "textfield", # TODO: make this an options field
-    "#title" => $t("ILLiad access permission name"),
-    "#description" => $t("the user_access() parameter to check before redirecting to ILLiad")
-   )
-  );
-  $url_field = array(
-   "field_name" => "illiad_url",
-   "default" => "https://ill.libraries.ou.edu/illiad.dll",
-   "field" => array(
-    "#type" => "textfield", # TODO: is there a URL field?
-    "#title" => $t("ILLiad sign-on URL"),
-    "#description" => $t("the form processing agent for ILLiad's API")
-   )
-  );
-  $secret_field = array(
-   "field_name" => "illiad_shared_secret",
-   "default" => "0",
-   "field" => array(
-    "#type" => "textfield", # TODO: make this a numeric field
-    "#title" => $t("ILLiad shared secret"),
-    "#description" => $t("the number to blend with the password")
-   )
-  );
-  $fields = array(
-   $sooner_id_profilefield_name_field, # unfortunately, order matters
-   $permission_field,
-   $url_field,
-   $secret_field
-  );
-  $form_data = array(
-   "fields" => $fields
-  );
-  $result = array(
-   "menu" => $menu_data,
-   "form" => $form_data,
-   "permissions" => array()
-  );
-  return $result;
- }
-}
-
+require_once("page_data.inc");
 
 // implements hook_menu
 function illiad_sso_menu(){
@@ -218,6 +51,7 @@ function illiad_sso_custom_page_login(){
  $module_name = "illiad_sso";
  $product_name = "ILLiad";
 
+ $illiad_sso_volatile_url = "";
  if(!$user->uid){
   $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
   $form = drupal_get_form("user_login");
@@ -225,37 +59,14 @@ function illiad_sso_custom_page_login(){
   return $form;
  }
 
- $ounetid = $user->name;
- if(array_key_exists("checkStatus", $_GET) && "true" == $_GET["checkStatus"]){
-  $impersonate_permission_name = "impersonate " . $product_name . " user";
-  if(user_access($impersonate_permission_name)){
-   if(array_key_exists("uid", $_GET) && $_GET["uid"])
-    $ounetid = $_GET["uid"];
-  }
- }
- if(!$ounetid){
-  // TODO: make a more meaningful error page here
-  $error = t("I wasn't able to find that user");
-  drupal_set_massage($error, "error");
-  return "";
- }
-
- $uid = db_query("SELECT uid FROM {users} WHERE name = :name AND status = 1", array(":name" => $ounetid))->fetchObject()->uid;
- $account = user_load($uid);
- if(!$account){
-  // TODO: make a more meaningful error page here
-  $error = t("No user by that name exists here.");
-  drupal_set_massage($error, "error");
-  return "";
- }
-
  $access_check = _illiad_sso_get_settings_variable("illiad_access permission");
- if(!user_access($access_check, $account)){
+ if(!user_access($access_check)){
   $error = t("You do not have permission to access " . $product_name);
   drupal_set_message($error, "error");
   return "";
  }
 
+ $account = user_load($user->uid);
  $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
  $sooner_id_field = field_get_items("user", $account, $sooner_id_field_name);
  $sooner_id = "";
@@ -264,10 +75,16 @@ function illiad_sso_custom_page_login(){
    if(array_key_exists("value", $sooner_id_field[0]))
     $sooner_id = $sooner_id_field[0]["value"];
  if(!$sooner_id){
-  $error = t("Your Sooner ID does not appear to be set.");
-  drupal_set_message($error, "error");
-  return ""; // TODO: redirect to the page where they can set their Sooner ID
+  drupal_set_message(t("User Verification"), "warning");
+  $message = t("To use InterLibrary Loan, the system needs to perform a one-time verification using your Sooner ID.  This information can be found on the student or faculty/staff ID card assigned to you.");
+  drupal_set_message($message, "warning");
+  $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
+  $form = drupal_get_form("illiad_sso_custom_form_sooner_id");
+  $illiad_sso_volatile_url = "";
+  return $form;
  }
+
+ $ounetid = $user->name;
 
  $secret = _illiad_sso_get_settings_variable("sso secret");
  $password = $sooner_id * 4 + $secret; # wow
@@ -316,18 +133,31 @@ function illiad_sso_custom_page_login(){
  );
 }
 
-function illiad_sso_form_alter(&$form, &$form_state, $form_id){
+// helper for form_alter
+function illiad_sso_custom_form_alter_redirect_url(&$form){
  global $illiad_sso_volatile_url;
  if(!$illiad_sso_volatile_url) return;
- if("illiad_login" != current_path())
-  return;
- if($form_id != "user_login") return;
  $form["illiad_sso_redirect_url"] = array(
   "#type" => "hidden",
   "#value" => $illiad_sso_volatile_url
  );
+ $illiad_sso_volatile_url = "";
 }
 
+// implements hook_form_alter
+function illiad_sso_form_alter(&$form, &$form_state, $form_id){
+ $target_forms = array(
+  "user_login",
+  "illiad_sso_custom_form_sooner_id"
+ );
+ if("illiad_login" != current_path())
+  return;
+ if(!in_array($form_id, $target_forms))
+  return;
+ illiad_sso_custom_form_alter_redirect_url($form);
+}
+
+// implements hook_user_login
 function illiad_sso_user_login(&$edit, $account){
  $values = $edit["values"];
  if(empty($values["illiad_sso_redirect_url"])) return;
@@ -363,6 +193,51 @@ function illiad_sso_custom_form($name, $values=NULL, $omit_prefix=FALSE){
 // form builder for settings page
 function illiad_sso_custom_form_settings(){
  return system_settings_form(illiad_sso_custom_form("settings"));
+}
+
+// form builder for missing Sooner ID on redirect page
+function illiad_sso_custom_form_sooner_id(){
+ return array(
+  "sooner_id" => array(
+   // TODO: validate (lol)
+   "#type" => "textfield",
+   "#title" => t("Sooner ID"),
+   "#description" => t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a> or <a href=\"tel:+14053253113\">(405)-325-3113</a>."),
+   "#required" => TRUE
+  ),
+  "buttons" => array(
+   "submit" => array(
+    "#type" => "submit",
+    "#value" => t("Set your Sooner ID")
+   )
+  ),
+  "#submit" => array("illiad_sso_custom_submit_form_sooner_id")
+ );
+}
+function illiad_sso_custom_submit_form_sooner_id($form, &$form_state){
+ global $user;
+ $product_name = "ILLiad";
+ $sooner_id = $form_state["values"]["sooner_id"];
+ $redirect_url = $form_state["values"]["illiad_sso_redirect_url"];
+
+ $account = user_load($user->uid);
+ $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
+
+ $sooner_id_field = field_get_items("user", $account, $sooner_id_field_name);
+ if($sooner_id_field)
+  if(array_key_exists(0, $sooner_id_field))
+   if(array_key_exists("value", $sooner_id_field[0]))
+    if($sooner_id_field[0]["value"]){
+     drupal_set_message("Your Sooner ID was already set.", "warning");
+     return;
+    }
+
+ $edit = array();
+ $edit[$sooner_id_field_name] = array("und" => array(array("value" => $sooner_id)));
+ user_save($account, $edit);
+
+ header("Location: " . $redirect_url);
+ exit();
 }
 
 // a helper for using the variables stored by the settings form
