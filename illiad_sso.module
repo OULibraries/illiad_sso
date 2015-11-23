@@ -127,9 +127,9 @@ function illiad_sso_custom_mvc($key){
    "menu" => $menu_item
   );
 
-  $soonerid_profilefield_name_field = array(
-   "field_name" => "soonerid_profilefield_name",
-   "default" => "field_soonerid",
+  $sooner_id_profilefield_name_field = array(
+   "field_name" => "sooner_id_profilefield_name",
+   "default" => "field_sooner_id",
    "field" => array(
     "#type" => "textfield", # TODO: can we make this an options field?
     "#title" => $t("Sooner ID profile field name"),
@@ -164,7 +164,7 @@ function illiad_sso_custom_mvc($key){
    )
   );
   $fields = array(
-   $soonerid_profilefield_name_field, # unfortunately, order matters
+   $sooner_id_profilefield_name_field, # unfortunately, order matters
    $permission_field,
    $url_field,
    $secret_field
@@ -256,21 +256,21 @@ function illiad_sso_custom_page_login(){
   return "";
  }
 
- $soonerid_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
- $soonerid_field = field_get_items("user", $account, $soonerid_field_name);
- $soonerid = "";
- if($soonerid_field)
-  if(array_key_exists(0, $soonerid_field))
-   if(array_key_exists("value", $soonerid_field[0]))
-    $soonerid = $soonerid_field[0]["value"];
- if(!$soonerid){
+ $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
+ $sooner_id_field = field_get_items("user", $account, $sooner_id_field_name);
+ $sooner_id = "";
+ if($sooner_id_field)
+  if(array_key_exists(0, $sooner_id_field))
+   if(array_key_exists("value", $sooner_id_field[0]))
+    $sooner_id = $sooner_id_field[0]["value"];
+ if(!$sooner_id){
   $error = t("Your Sooner ID does not appear to be set.");
   drupal_set_message($error, "error");
   return ""; // TODO: redirect to the page where they can set their Sooner ID
  }
 
  $secret = _illiad_sso_get_settings_variable("sso secret");
- $password = $soonerid * 4 + $secret; # wow
+ $password = $sooner_id * 4 + $secret; # wow
 
  $login_form_action = _illiad_sso_login_action();
 
