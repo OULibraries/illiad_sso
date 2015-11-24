@@ -1,5 +1,11 @@
 <?php
 
+// contents
+//  contents
+//  custom_mvc
+//  _get_settings_variable
+
+
 // data-oriented approach to mvc (not really mvc per se)
 function illiad_sso_custom_mvc($key){
  if("keys" == $key)
@@ -167,4 +173,25 @@ function illiad_sso_custom_mvc($key){
   );
   return $result;
  }
+}
+
+
+// a helper for using the variables stored by the settings form
+function _illiad_sso_get_settings_variable($varname){
+ $module_name = "illiad_sso";
+ $settings = illiad_sso_custom_mvc("settings");
+ $form = $settings["form"];
+ $names_to_index = array_flip(
+  array(
+   "sooner_id profile_field name",
+   "illiad_access permission",
+   "illiad url",
+   "sso secret"
+  )
+ );
+ $index = $names_to_index[$varname];
+ $field_data = $form["fields"][$index];
+ $variable = $module_name . "_" . $field_data["field_name"];
+ $fallback = $field_data["default"];
+ return variable_get($variable, $fallback);
 }

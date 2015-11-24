@@ -1,5 +1,14 @@
 <?php
 
+// contents
+//  contents
+//  menu
+//  permission
+//  custom_form_alter_redirect_url
+//  form_alter
+//  user_login
+
+
 // implements hook_menu
 function illiad_sso_menu(){
  $menu_items = array();
@@ -52,6 +61,7 @@ function illiad_sso_form_alter(&$form, &$form_state, $form_id){
   return;
  illiad_sso_custom_form_alter_redirect_url($form);
 }
+
 
 // implements hook_user_login
 function illiad_sso_user_login(&$edit, $account){
