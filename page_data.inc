@@ -49,16 +49,8 @@ function illiad_sso_custom_mvc($key){
     "description" => $t("Log in to " . $product_name)
    )
   );
-  $impersonate_permission = array(
-   "name" => "impersonate " . $product_name . " user",
-   "item" => array(
-    "title" => $t("Masquerade as an ILLiad user"),
-    "description" => $t("Spoof the OUNetID of a user, to log in as them, for diagnostic purposes")
-   )
-  );
   $permissions = array(
-   $access_permission,
-   $impersonate_permission
+   $access_permission
   );
   $result = array(
    "menu" => $menu_data,
