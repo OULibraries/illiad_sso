@@ -93,10 +93,18 @@ function illiad_sso_custom_page_login(){
   $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
   $form = drupal_get_form("illiad_sso_custom_form_sooner_id");
   $illiad_sso_volatile_url = "";
-  drupal_set_message(t("User Verification"), "warning");
-  $message = t("To use InterLibrary Loan, the system needs to perform a one-time verification using your Sooner ID.  This information can be found on the student or faculty/staff ID card assigned to you.");
-  drupal_set_message($message, "warning");
-  return $form;
+  drupal_set_message(t("Sooner ID Verification"), "warning");
+  $message = t("The InterLibrary Loan system needs to perform a one-time verification using your Sooner ID.  This information can be found on the student or faculty/staff ID card assigned to you.");
+  //drupal_set_message($message, "warning");
+  return array(
+   array(
+    "#markup" => "<p>" . $message . "</p>"
+   ),
+   $form,
+   array(
+    "#markup" => "<div class=\"sooner_id\">You can contact <a href=\"https://libraries.ou.edu/ill\">InterLibrary Loan</a> at <a href=\"tel:+14053256422\">(405)-325-6422</a>.</div>"
+   )
+  );
  }
 
  $ounetid = $user->name;

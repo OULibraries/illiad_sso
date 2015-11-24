@@ -25,7 +25,7 @@ function illiad_sso_custom_mvc($key){
  $access_permission_name = "access " . $product_name;
  if("login" == $key){
   $path = "illiad_login";
-  $title = $product_name . " login";
+  $title = "My ILL Login";
   $description = "log in to " . $product_name;
   $page_callback = $module_name . "_custom_page_login";
   $access_arguments = array("access content");

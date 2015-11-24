@@ -38,12 +38,14 @@ function illiad_sso_custom_form_settings(){
 
 // form builder for missing Sooner ID on redirect page
 function illiad_sso_custom_form_sooner_id(){
+ $phone_link = "";
+ $phone_link = " or <a href=\"tel:+14053253113\">(405)-325-3113</a>";
  return array(
   "sooner_id" => array(
    // TODO: validate (lol)
    "#type" => "textfield",
    "#title" => t("Sooner ID"),
-   "#description" => t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a> or <a href=\"tel:+14053253113\">(405)-325-3113</a>."),
+   "#description" => t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>" . $phone_link . "."),
    "#required" => TRUE
   ),
   "buttons" => array(
