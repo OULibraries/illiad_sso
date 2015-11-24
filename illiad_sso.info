@@ -1,3 +1,4 @@
 name = "ILLiad SSO"
 description = "Single Sign-on support for ILLiad"
 core = "7.x"
+configure = admin/config/illiad/settings
