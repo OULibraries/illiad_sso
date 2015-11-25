@@ -102,7 +102,7 @@ function illiad_sso_custom_page_login(){
   $contact_message = _illiad_sso_get_settings_variable("contact_ill");
   return array(
    array(
-    "#markup" => "<p>" . $message . "</p>"
+    "#markup" => "<div class=\"sooner_id_intro\">" . $message . "</div>"
    ),
    $form,
    array(
