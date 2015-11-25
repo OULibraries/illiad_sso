@@ -46,7 +46,8 @@ function illiad_sso_custom_form_sooner_id(){
    "#title" => t("Sooner ID"),
    "#description" => t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>" . $phone_link . "."),
    "#required" => TRUE,
-   "#element_validate" => array("element_validate_number"),
+   "#element_validate" => array("element_validate_integer_positive"), // TODO: custom validator
+   "#maxlength" => 9,
   ),
   "buttons" => array(
    "submit" => array(
