@@ -38,17 +38,25 @@ function illiad_sso_custom_form_settings(){
 
 // form builder for missing Sooner ID on redirect page
 function illiad_sso_custom_form_sooner_id(){
+ global $user;
+
  $phone_link = "";
  $phone_link = " or <a href=\"tel:+14053253113\">(405)-325-3113</a>";
+ $contact_message = t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>" . $phone_link . ".");
+
+ $account = user_load($user->uid);
+ $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
+ $user_form = array();
+ $fake_state = array();
+ field_attach_form("user", $account, $user_form, $fake_state);
+ $sooner_id_field = $user_form[$sooner_id_field_name];
+
+ $sooner_id_field["#weight"] = 0;
+ $sooner_id_field["und"][0]["value"]["#description"] = $contact_message;
+ $sooner_id_field["und"][0]["value"]["#required"] = TRUE;
+
  return array(
-  "sooner_id" => array(
-   "#type" => "textfield",
-   "#title" => t("Sooner ID"),
-   "#description" => t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>" . $phone_link . "."),
-   "#required" => TRUE,
-   "#element_validate" => array("element_validate_integer_positive"), // TODO: custom validator
-   "#maxlength" => 9,
-  ),
+  "sooner_id" => $sooner_id_field,
   "buttons" => array(
    "submit" => array(
     "#type" => "submit",
