@@ -135,7 +135,7 @@ function illiad_sso_custom_mvc($key){
    "field_name" => "illiad_url",
    "default" => "https://ill.libraries.ou.edu/illiad.dll",
    "field" => array(
-    "#type" => "textfield", # TODO: is there a URL field?
+    "#type" => "textfield", // TODO: is there a URL field?
     "#title" => $t("ILLiad sign-on URL"),
     "#description" => $t("the form processing agent for ILLiad's API")
    )
@@ -153,7 +153,7 @@ function illiad_sso_custom_mvc($key){
    "field_name" => "login_instructions",
    "default" => $t("You must be logged in to access ILL."),
    "field" => array(
-    "#type" => "textfield", // TODO: make this a textarea
+    "#type" => "textarea",
     "#title" => "Login page instructions.",
     "#description" => $t("The text that appears under the page title and above the form when the user is not logged in.  It should tell them why they need to log in.  It is raw HTML.")
    )
@@ -162,7 +162,7 @@ function illiad_sso_custom_mvc($key){
    "field_name" => "sooner_id_description",
    "default" => $t("The InterLibrary Loan system needs to perform a one-time verification using your Sooner ID.  This information can be found on the student or faculty/staff ID card assigned to you."),
    "field" => array(
-    "#type" => "textfield", // TODO: make this a textarea
+    "#type" => "textarea",
     "#title" => "Sooner ID instructions",
     "#description" => "Raw HTML for the description above the Sooner ID form."
    )
@@ -171,7 +171,7 @@ function illiad_sso_custom_mvc($key){
    "field_name" => "contact_message",
    "default" => $t("You can contact <a href=\"https://libraries.ou.edu/ill\">InterLibrary Loan</a> at <a href=\"tel:+14053256422\">(405)-325-6422</a>."),
    "field" => array(
-    "#type" => "textfield", // TODO: make this a textarea
+    "#type" => "textarea",
     "#title" => "ILL contact message",
     "#description" => "Raw HTML saying how to contact ILL.  This appears underneath the Sooner ID form."
    )
