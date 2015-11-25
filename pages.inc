@@ -71,7 +71,7 @@ function illiad_sso_custom_page_login(){
   $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
   $form = drupal_get_form("user_login");
   $illiad_sso_volatile_url = "";
-  $message = t("You must be logged in to access ILL.");
+  $message = _illiad_sso_get_settings_variable("login_instructions");
   return array(
    array("#markup" => "<div class=\"my_ill_login\">" . $message . "</div>\n"),
    $form

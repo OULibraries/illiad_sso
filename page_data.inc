@@ -144,16 +144,26 @@ function illiad_sso_custom_mvc($key){
    "field_name" => "illiad_shared_secret",
    "default" => "0",
    "field" => array(
-    "#type" => "textfield", # TODO: make this a numeric field
+    "#type" => "textfield", // TODO: make this a numeric field
     "#title" => $t("ILLiad shared secret"),
     "#description" => $t("the number to blend with the password")
+   )
+  );
+  $login_instructions_field = array(
+   "field_name" => "login_instructions",
+   "default" => $t("You must be logged in to access ILL."),
+   "field" => array(
+    "#type" => "textfield", // TODO: make this a textarea
+    "#title" => "Login page instructions.",
+    "#description" => $t("The text that appears under the page title and above the form when the user is not logged in.  It should tell them why they need to log in.  It is raw HTML.")
    )
   );
   $fields = array(
    $sooner_id_profilefield_name_field, # unfortunately, order matters
    $permission_field,
    $url_field,
-   $secret_field
+   $secret_field,
+   $login_instructions_field
   );
   $form_data = array(
    "fields" => $fields
@@ -178,7 +188,8 @@ function _illiad_sso_get_settings_variable($varname){
    "sooner_id profile_field name",
    "illiad_access permission",
    "illiad url",
-   "sso secret"
+   "sso secret",
+   "login_instructions"
   )
  );
  $index = $names_to_index[$varname];
