@@ -158,12 +158,32 @@ function illiad_sso_custom_mvc($key){
     "#description" => $t("The text that appears under the page title and above the form when the user is not logged in.  It should tell them why they need to log in.  It is raw HTML.")
    )
   );
-  $fields = array(
-   $sooner_id_profilefield_name_field, # unfortunately, order matters
+  $sooner_id_description_field = array(
+   "field_name" => "sooner_id_description",
+   "default" => $t("The InterLibrary Loan system needs to perform a one-time verification using your Sooner ID.  This information can be found on the student or faculty/staff ID card assigned to you."),
+   "field" => array(
+    "#type" => "textfield", // TODO: make this a textarea
+    "#title" => "Sooner ID instructions",
+    "#description" => "Raw HTML for the description above the Sooner ID form."
+   )
+  );
+  $contact_ill_field = array(
+   "field_name" => "contact_message",
+   "default" => $t("You can contact <a href=\"https://libraries.ou.edu/ill\">InterLibrary Loan</a> at <a href=\"tel:+14053256422\">(405)-325-6422</a>."),
+   "field" => array(
+    "#type" => "textfield", // TODO: make this a textarea
+    "#title" => "ILL contact message",
+    "#description" => "Raw HTML saying how to contact ILL.  This appears underneath the Sooner ID form."
+   )
+  );
+  $fields = array( // unfortunately, order matters
+   $sooner_id_profilefield_name_field,
    $permission_field,
    $url_field,
    $secret_field,
-   $login_instructions_field
+   $login_instructions_field,
+   $sooner_id_description_field,
+   $contact_ill_field,
   );
   $form_data = array(
    "fields" => $fields
@@ -189,7 +209,9 @@ function _illiad_sso_get_settings_variable($varname){
    "illiad_access permission",
    "illiad url",
    "sso secret",
-   "login_instructions"
+   "login_instructions",
+   "sooner_id_description",
+   "contact_ill",
   )
  );
  $index = $names_to_index[$varname];
