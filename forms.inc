@@ -43,10 +43,12 @@ function illiad_sso_custom_form_sooner_id(){
  $phone_link = " or (405)-325-3113";
  $sooner_card_email = "<a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>";
  $sooner_card_email = "soonercard@ou.edu";
+ $contact_message = t("For help finding this information, please contact the Sooner Card Office at " . $sooner_card_email . $phone_link . ".");
+ $contact_message = "";
  $sooner_id_field = array(
   "#type" => "textfield",
   "#title" => t("Sooner ID"),
-  "#description" => t("For help finding this information, please contact the Sooner Card Office at " . $sooner_card_email . $phone_link . "."),
+  "#description" => $contact_message,
   "#required" => TRUE,
   "#element_validate" => array("element_validate_integer_positive"), // TODO: custom validator
   "#maxlength" => 9,
