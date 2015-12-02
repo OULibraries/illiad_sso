@@ -42,7 +42,10 @@ function illiad_sso_custom_form_sooner_id(){
 
  $phone_link = "";
  $phone_link = " or <a href=\"tel:+14053253113\">(405)-325-3113</a>";
- $contact_message = t("For help finding this information, please contact the Sooner Card Office at <a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>" . $phone_link . ".");
+ $phone_link = " or (405)-325-3113";
+ $sooner_card_email = "<a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>";
+ $sooner_card_email = "soonercard@ou.edu";
+ $contact_message = t("For help finding this information, please contact the Sooner Card Office at " . $sooner_card_email . $phone_link . ".");
 
  $account = user_load($user->uid);
  $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
@@ -55,8 +58,18 @@ function illiad_sso_custom_form_sooner_id(){
  $sooner_id_field["und"][0]["value"]["#description"] = $contact_message;
  $sooner_id_field["und"][0]["value"]["#required"] = TRUE;
 
+ // superstition
+ $confirm_sooner_id_field = array() + $sooner_id_field;
+ $confirm_sooner_id_field["und"] = array() + $sooner_id_field["und"];
+ $confirm_sooner_id_field["und"][0] = array() + $sooner_id_field["und"][0];
+ $confirm_sooner_id_field["und"][0]["value"] = array() + $sooner_id_field["und"][0]["value"];
+
+ $confirm_sooner_id_field["und"][0]["value"]["#title"] = t("Confirm Sooner ID");
+ $confirm_sooner_id_field["und"][0]["value"]["#description"] = t("Type your Sooner ID again.");
+
  return array(
   "sooner_id" => $sooner_id_field,
+  "confirm_sooner_id" => $confirm_sooner_id_field,
   "buttons" => array(
    "submit" => array(
     "#type" => "submit",
@@ -66,11 +79,25 @@ function illiad_sso_custom_form_sooner_id(){
   "#submit" => array("illiad_sso_custom_submit_form_sooner_id")
  );
 }
+
 function illiad_sso_custom_submit_form_sooner_id($form, &$form_state){
  global $user;
  $product_name = "ILLiad";
- $sooner_id = $form_state["values"]["sooner_id"];
+
  $redirect_url = $form_state["values"]["illiad_sso_redirect_url"];
+
+ $sooner_id = $form_state["values"]["sooner_id"]["und"][0]["value"];
+ $confirm_sooner_id = $form_state["values"]["confirm_sooner_id"]["und"][0]["value"];
+ $good = TRUE;
+ if($sooner_id != $confirm_sooner_id)
+  $good = FALSE;
+ if(9 != strlen($sooner_id))
+  $good = FALSE;
+ if(!$good){
+  drupal_set_message("Your Sooner ID needs to match and have exactly 9 digits.", "error");
+  header("Location: " . $redirect_url);
+  exit();
+ }
 
  $account = user_load($user->uid);
  $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
