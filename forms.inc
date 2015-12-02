@@ -76,13 +76,13 @@ function illiad_sso_custom_submit_form_sooner_id($form, &$form_state){
  $redirect_url = $form_state["values"]["illiad_sso_redirect_url"];
  $sooner_id = $form_state["values"]["sooner_id"];
  $confirm_sooner_id = $form_state["values"]["confirm_sooner_id"];
- $good = TRUE;
+ $error = "";
  if($sooner_id != $confirm_sooner_id)
-  $good = FALSE;
+  $error = t("Sooner ID must match.");
  if(9 != strlen($sooner_id))
-  $good = FALSE;
- if(!$good){
-  drupal_set_message("Your Sooner ID needs to match and have exactly 9 digits.", "error");
+  $error = t("Sooner ID must be exactly 9 digits.");
+ if($error){
+  drupal_set_message($error, "error");
   header("Location: " . $redirect_url);
   exit();
  }
