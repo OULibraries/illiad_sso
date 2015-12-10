@@ -43,7 +43,7 @@ function _illiad_sso_login_action(){
    $atitle = "";
    if(array_key_exists("rft.atitle", $_GET))
     $atitle = $_GET["rft.atitle"];
-   if(!$atitle)
+   if($atitle)
     foreach(array("unknown", "issue") as $genre)
      $replacements["&rft.genre=" . $genre] = "&rft.genre=article";
    foreach(array(":", "%3A") as $colon)
