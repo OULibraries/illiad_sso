@@ -46,6 +46,7 @@ function illiad_sso_custom_form_sooner_id(){
  $sooner_card_email = "<a href=\"mailto:soonercard@ou.edu\">soonercard@ou.edu</a>";
  $sooner_card_email = "soonercard@ou.edu";
  $contact_message = t("For help finding this information, please contact the Sooner Card Office at " . $sooner_card_email . $phone_link . ".");
+ $contact_message = "";
 
  $account = user_load($user->uid);
  $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
