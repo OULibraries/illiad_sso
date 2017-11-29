@@ -82,7 +82,7 @@ function illiad_sso_custom_page_login(){
  if(!user_access($access_check)){
   $error = t("You do not have permission to access " . $product_name);
   drupal_set_message($error, "error");
-  return "";/
+  return "";
  }
 
  $account = user_load($user->uid);
