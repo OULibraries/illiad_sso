@@ -9,7 +9,7 @@
 // a helper for determining the "action" URL of the ILLiad login form
 function _illiad_sso_login_action(){
  $querystring = $_SERVER["QUERY_STRING"];
- $url = _illiad_sso_get_settings_variable("illiad url");
+ $url = variable_get("illiad_sso_illiad_url",""); 
  if(!$querystring) return $url;
  $task = "";
  if(array_key_exists("task", $_GET))
@@ -71,22 +71,22 @@ function illiad_sso_custom_page_login(){
   $illiad_sso_volatile_url = $_SERVER["REQUEST_URI"];
   $form = drupal_get_form("user_login");
   $illiad_sso_volatile_url = "";
-  $message = _illiad_sso_get_settings_variable("login_instructions");
+  $message = variable_get("illiad_sso_login_instructions","");
   return array(
    array("#markup" => "<div class=\"my_ill_login\">" . $message . "</div>\n"),
    $form
   );
  }
 
- $access_check = _illiad_sso_get_settings_variable("illiad_access permission");
+ $access_check = variable_get("illiad_sso_illiad_sso_access_permission");
  if(!user_access($access_check)){
   $error = t("You do not have permission to access " . $product_name);
   drupal_set_message($error, "error");
-  return "";
+  return "";/
  }
 
  $account = user_load($user->uid);
- $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
+ $sooner_id_field_name = variable_get("illiad_sso_sooner_id_profilefield_name");
  $sooner_id_field = field_get_items("user", $account, $sooner_id_field_name);
  $sooner_id = "";
  if($sooner_id_field)
@@ -98,8 +98,8 @@ function illiad_sso_custom_page_login(){
   $form = drupal_get_form("illiad_sso_custom_form_sooner_id");
   $illiad_sso_volatile_url = "";
   drupal_set_message(t("Sooner ID Verification"), "warning");
-  $message = _illiad_sso_get_settings_variable("sooner_id_description");
-  $contact_message = _illiad_sso_get_settings_variable("contact_ill");
+  $message = variable_get("illiad_sso_sooner_id_description","");
+  $contact_message = variable_get("illiad_sso_contact_message","");
   return array(
    array(
     "#markup" => "<div class=\"sooner_id_intro\">" . $message . "</div>"
@@ -113,7 +113,7 @@ function illiad_sso_custom_page_login(){
 
  $ounetid = $user->name;
 
- $secret = _illiad_sso_get_settings_variable("sso secret");
+ $secret = variable_get("illiad_sso_illiad_shared_secret");
  $password = $sooner_id * 4 + $secret; # wow
 
  $login_form_action = _illiad_sso_login_action();
