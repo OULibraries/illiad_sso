@@ -5,34 +5,82 @@
 //  custom_form
 //  custom_form_sooner_id
 //  custom_submit_form_sooner_id
-
-
-// a helper for forms nestled in the above custom false-"mvc" format
-function illiad_sso_custom_form($name, $values=NULL, $omit_prefix=FALSE){
- $module_name = "illiad_sso";
- $mvc = illiad_sso_custom_mvc($name);
- $form_data = $mvc["form"];
- $form = array();
- foreach($form_data["fields"] as $field_data){
-  $prefix = $omit_prefix ? "" : $module_name . "_";
-  $field_name = $prefix . $field_data["field_name"];
-  $field = $field_data["field"];
-  if(isset($values) && array_key_exists($field_data["field_name"], $values))
-   $field["value"] = $values[$field_data["field_name"]];
-  else{
-   $fallback_value = $field_data["default"];
-   $default_variable = $field_name;
-   $default_value = variable_get($default_variable, $fallback_value);
-   $field["#default_value"] = $default_value;
-  }
-  $form[$field_name] = $field;
- }
- return $form;
-}
-
 // form builder for settings page
+
+
 function illiad_sso_custom_form_settings(){
- return system_settings_form(illiad_sso_custom_form("settings"));
+
+  $form = array (
+    'illiad_sso_sooner_id_profilefield_name' => array (
+      '#type' => 'textfield',
+      '#title' => 'Sooner ID profile field name',
+      '#description' => 'the name of the profile field that represents the Sooner ID',
+      '#default_value' => 'field_sooner_id',
+    ),
+    'illiad_sso_illiad_sso_access_permission' => array (
+      '#type' => 'textfield',
+      '#title' => 'ILLiad access permission name',
+      '#description' => 'the user_access() parameter to check before redirecting to ILLiad',
+      '#default_value' => 'access ILLiad',
+    ),
+    'illiad_sso_illiad_url' => array (
+      '#type' => 'textfield',
+      '#title' => 'ILLiad sign-on URL',
+      '#description' => 'the form processing agent for ILLiad\'s API',
+      '#default_value' => 'https://ill.libraries.ou.edu/illiad.dll',
+    ),
+    'illiad_sso_illiad_shared_secret' => array (
+      '#type' => 'textfield',
+      '#title' => 'ILLiad shared secret',
+      '#description' => 'the number to blend with the password',
+      '#default_value' => '1492',
+    ),
+    'illiad_sso_login_instructions' => array (
+      '#type' => 'textarea',
+      '#title' => 'Login page instructions.',
+      '#description' => 'The text that appears under the page title and above the form when the user is not logged in.  It should tell them why they need to log in.  It is raw HTML.',
+      '#default_value' => '<strong>Note</strong>: to utilize OU-Norman interlibrary loan and Sooner Xpress services, you must first log into the libraries\' website.
+  <br />&nbsp;<br>
+  <strong>ILL Links for other OU campuses</strong>
+  <ul>
+  <li><a href="https://illiad.ouhsc.edu/illiad" target="_blank">OU HSC Interlibrary Loan</a> - Log in here if you are a Health Sciences student</li>
+  <li><a href="https://outulsa.illiad.oclc.org/illiad/illiad.dll?Action=10&Form=30&genre=book" target="_blank">OU-Tulsa Interlibrary Loan</a> - Log in here if you are an OU-Tulsa student</li>
+  </ul>
+  <strong>Off-Site Storage Request link for Non-OU Patrons</strong>
+  <ul>
+  <li><a href="https://libraries.webdev.lib.ou.edu/content/paging-request-item-site-storage" target="_blank">Off-Site Storage Request form</a></li>
+  </ul>',
+    ),
+    'illiad_sso_sooner_id_description' => array ( 
+      '#type' => 'textarea', 
+      '#title' => 'Sooner ID instructions',
+      '#description' => 'Raw HTML for the description above the Sooner ID form.',
+      '#default_value' => '<div class="row">
+  <div class="col-md-12">
+  <p>The InterLibrary Loan system needs to perform a one-time verification using your Sooner ID <strong>(not your 4x4)</strong>.  </p>
+  <hr>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-md-4">
+  <img src="https://lib.ou.edu/documents/sooner_id_sm.jpg">
+  </div>
+  <div class="col-md-8">
+  <p>&nbsp;</p>
+  <p>This information can be found on the student or faculty/staff ID card assigned to you. For help finding this information, please contact the Sooner Card Office at (405)-325-3113.</p>
+  <p>&nbsp;</p>
+  <p>OU-Tulsa students can login at  <a href="https://outulsa.illiad.oclc.org/illiad/illiad.dll?Action=10&Form=30&genre=book" target="_blank">OU-Tulsa Interlibrary Loan</a> to use their ILL service.</p></div></div>
+  
+  </row>',
+    ),
+    'illiad_sso_contact_message' => array (
+      '#type' => 'textarea',
+      '#title' => 'ILL contact message',
+      '#description' => 'Raw HTML saying how to contact ILL.  This appears underneath the Sooner ID form.',
+      '#default_value' => 'You can contact <a href="https://libraries.ou.edu/ill">InterLibrary Loan</a> at <a href="tel:+14053256422">(405)-325-6422</a>.',
+    ),
+  );
+  return system_settings_form( $form);
 }
 
 
@@ -90,8 +138,7 @@ function illiad_sso_custom_submit_form_sooner_id($form, &$form_state){
  }
 
  $account = user_load($user->uid);
- $sooner_id_field_name = _illiad_sso_get_settings_variable("sooner_id profile_field name");
-
+ $sooner_id_field_name = variable_get("illiad_sso_sooner_id_profilefield_name");
  $sooner_id_field = field_get_items("user", $account, $sooner_id_field_name);
  if($sooner_id_field)
   if(array_key_exists(0, $sooner_id_field))
