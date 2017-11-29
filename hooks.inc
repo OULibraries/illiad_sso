@@ -11,30 +11,58 @@
 
 // implements hook_menu
 function illiad_sso_menu(){
- $menu_items = array();
- $keys = illiad_sso_custom_mvc("keys");
- foreach($keys as $key){
-  $mvc = illiad_sso_custom_mvc($key);
-  if(array_key_exists("menu", $mvc)){
-   $menu = $mvc["menu"];
-   $menu_items[$menu["path"]] = $menu["menu"];
-  }
- }
- return $menu_items;
+
+  $items = array (
+    'illiad_login' => array (
+        'title' => 'My ILL Login',
+        'description' => 'log in to ILLiad',
+        'page callback' => 'illiad_sso_custom_page_login',
+        'access arguments' => 
+        array (
+          0 => 'access content',
+        ),
+        'type' => 0,
+      ),
+    'admin/config/illiad' => array (
+        'title' => 'ILLiad SSO',
+        'description' => 'Configure ILLiad integration.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array (
+          0 => 'administer illiad_sso',
+        ),
+        'file' => 'system.admin.inc',
+        'file path' => 'modules/system',
+      ),
+    'admin/config/illiad/settings' => array (
+        'title' => 'ILLiad SSO Settings',
+        'description' => 'Settings for ILLiad',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array (
+          0 => 'illiad_sso_custom_form_settings',
+        ),
+        'access arguments' => array (
+          0 => 'administer illiad_sso',
+        ),
+      ),
+  );
+  return $items;	
 }
 
 // implements hook_permission
 function illiad_sso_permission(){
- $permissions = array();
- $keys = illiad_sso_custom_mvc("keys");
- foreach($keys as $key){
-  $mvc = illiad_sso_custom_mvc($key);
-  if(array_key_exists("permissions", $mvc)){
-   foreach($mvc["permissions"] as $permission)
-    $permissions[$permission["name"]] = $permission["item"];
-  }
- }
- return $permissions;
+	
+  $permissions = array (
+    'access ILLiad' => array (
+      'title' => 'Access ILLiad',
+      'description' => 'Log in to ILLiad',
+    ),
+    'administer illiad_sso' => array (
+      'title' => 'Administer ILLiad SSO',
+      'description' => 'Configure the ILLiad SSO module',
+    ),
+  );
+  
+  return $permissions;
 }
 
 
