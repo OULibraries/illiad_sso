@@ -4,7 +4,6 @@
 //  contents
 //  includes
 
-require_once("page_data.inc");
 require_once("hooks.inc");
 require_once("forms.inc");
 require_once("pages.inc");
