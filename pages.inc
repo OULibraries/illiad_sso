@@ -18,40 +18,42 @@ function _illiad_sso_login_action(){
  if("tulsapass" == $task) return $url;
 
  $replacements = array();
- foreach(array("title", "jtitle", "stitle", "au") as $k)
+ foreach(array("title", "jtitle", "stitle", "au", "isbn", "issn") as $k){
+  $replacements["&" . $k . "=&"] = "&";
   $replacements["&rft." . $k . "=&"] = "&";
-
- $value = "GenericRequestSoonerLoan";
-
- $loan = "sxloan";
- if($loan == $task)
-  $replacements["genre=book"] = "genre=" . $loan;
- else{
-  if("sxcopy" == $task){
-   if(array_key_exists("rft.genre", $_GET) && "book" == $_GET["rft.genre"]){
-    $replacements["genre=book"] = "genre=" . $loan;
-   }
-   else{
-    foreach(array("article", "journal", "bookitem") as $genre)
-     $replacements["genre=" . $genre] = "genre=sxarticle";
-    $value = "GenericRequestSoonerArticle";
-   }
-  }
-  else{
-   foreach(array("isbn", "issn") as $k)
-    $replacements["&" . $k . "=&"] = "&";
-   $atitle = "";
-   if(array_key_exists("rft.atitle", $_GET))
-    $atitle = $_GET["rft.atitle"];
-   if($atitle)
-    foreach(array("unknown", "issue") as $genre)
-     $replacements["&rft.genre=" . $genre] = "&rft.genre=article";
-   foreach(array(":", "%3A") as $colon)
-    $replacements["prime.exlibrisgroup.com" . $colon] = "";
-   $value = "";
-  }
+  $replacements["&rft_" . $k . "=&"] = "&"; # account for cas module querystring replacement
  }
 
+ $value = "";
+ 
+ if("sxloan" == $task){
+  $replacements["genre=book&"] = "genre=sxloan&";
+  $replacements["genre=unknown"] = "genre=sxloan";
+  $value = "GenericRequestSoonerLoan";
+ }
+ 
+ if("sxcopy" == $task){
+   foreach(array("article", "journal", "bookitem", "unknown", "issue") as $genre)
+    $replacements["genre=" . $genre] = "genre=sxarticle";
+   $value = "GenericRequestSoonerArticle";
+ }
+ 
+ if(array_key_exists("rft.atitle", $_GET) || array_key_exists("rft_atitle", $_GET)){
+  $atitle = "";
+  if(array_key_exists("rft.atitle", $_GET)){
+   $atitle = $_GET["rft.atitle"];
+  } else {
+   $atitle = $_GET["rft_atitle"];
+  }
+  if($atitle){
+   foreach(array("unknown", "issue") as $genre)
+    $replacements["genre=" . $genre] = "genre=article";
+  }
+ }
+ 
+ foreach(array(":", "%3A") as $colon)
+  $replacements["primo.exlibrisgroup.com" . $colon] = "";
+ 
  foreach($replacements as $k => $v)
   $querystring = str_replace($k, $v, $querystring);
 
